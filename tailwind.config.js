@@ -1,4 +1,3 @@
-// tailwind.config.js
 export default {
   content: [
     "./index.html",
@@ -7,7 +6,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 新增抖音红，命名为 dy-red
         'dy-red': '#FE2C55',
       },
     },

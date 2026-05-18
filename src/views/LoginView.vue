@@ -45,56 +45,17 @@
         <div class="flex-1 px-10">
 
           <div class="flex gap-8 mb-10 text-lg border-b border-gray-100 pb-3">
-            <button
-              @click="activeTab = 'code'"
-              :class="['font-bold pb-2', activeTab === 'code' ? 'text-gray-950 border-b-4 border-gray-950' : 'text-gray-400']"
-            >
-              验证码登录
-            </button>
-            <button
-              @click="activeTab = 'password'"
-              :class="['font-bold pb-2', activeTab === 'password' ? 'text-gray-950 border-b-4 border-gray-950' : 'text-gray-400']"
-            >
+            <button :class="['font-bold pb-2', 'text-gray-950 border-b-4 border-gray-950']">
               密码登录
             </button>
           </div>
 
-          <div v-if="activeTab === 'code'" class="space-y-6">
-
-            <div class="bg-gray-100 rounded-2xl p-4 flex items-center gap-4">
-              <div class="flex items-center gap-1 text-gray-700">
-                <span>+86</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <input
-                v-model="phone"
-                type="tel"
-                placeholder="请输入手机号"
-                class="flex-1 bg-transparent text-lg focus:outline-none placeholder:text-gray-300 text-gray-950"
-              />
-            </div>
-
-            <div class="bg-gray-100 rounded-2xl p-4 flex items-center justify-between">
-              <input
-                v-model="code"
-                type="text"
-                placeholder="请输入验证码"
-                class="bg-transparent text-lg focus:outline-none placeholder:text-gray-300 text-gray-950"
-              />
-              <button class="text-lg font-medium text-gray-400 hover:text-gray-600">
-                获取验证码
-              </button>
-            </div>
-          </div>
-
-          <div v-else class="space-y-6">
+          <div class="space-y-6">
             <div class="bg-gray-100 rounded-2xl p-4">
-              <input type="text" placeholder="手机号/邮箱/抖音号" class="w-full bg-transparent text-lg focus:outline-none" />
+              <input type="text" placeholder="手机号" class="w-full bg-transparent text-lg focus:outline-none" v-model="phone"/>
             </div>
             <div class="bg-gray-100 rounded-2xl p-4">
-              <input type="password" placeholder="密码" class="w-full bg-transparent text-lg focus:outline-none" />
+              <input type="password" placeholder="密码" class="w-full bg-transparent text-lg focus:outline-none" v-model="password"/>
             </div>
           </div>
 
@@ -120,31 +81,42 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router'; // 引入路由
+import { useUserStore } from '../stores/user'; // 引入咱们的仓库
+import request from '../utils/request';
 
-// 1. 定义页面的状态
-const activeTab = ref('code'); // 当前激活的 Tab ('code' 或 'password')
 const phone = ref('');         // 用户输入的手机号
-const code = ref('');          // 用户输入的验证码
-
+const password = ref('');          // 用户输入的验证码
+const router = useRouter();
+const userStore = useUserStore();
 // 2. 计算属性：判断登录按钮是否应该禁用
 // 只有当两个输入框都有内容时，按钮才变亮（模仿抖音的原型逻辑）
 const isLoginDisabled = computed(() => {
-  return !phone.value || !code.value;
+  return !phone.value || !password.value;
 });
 
 // 3. 登录逻辑处理
-const handleLogin = () => {
+const handleLogin = async () => {
   if (isLoginDisabled.value) return;
-
-  // 这里封装你发给后端的 JSON
   const payload = {
-    method: activeTab.value,
-    phone: phone.value,
-    code: code.value,
+    // 注意：这里的字段名要和你 Go 后端 request.go 结构体里的 json 标签对齐
+    username: phone.value,
+    password: password.value,
   };
-
-  console.log('向 Go 后端发送登录请求:', payload);
-  // axios.post('/api/login', payload).then(...)
+  try {
+    // 真正的网络请求！
+    const res = await request.post('/user/login', payload);
+    // 假设 Go 返回的数据在 res.data.token 里
+    const token = res.data.token;
+    // 1. 把 Token 存进 Pinia 和 localStorage
+    userStore.setToken(token);
+    console.log('登录成功，准备跳转！');
+    // 2. 跳转到首页 (记得在 router/index.js 里建一个路径为 '/home' 的路由)
+    router.push('/home');
+  } catch (error) {
+    console.error('登录失败:', error);
+    // 错误已经在 request.js 拦截器里 alert 过了，这里无需额外处理
+  }
 };
 </script>
 
