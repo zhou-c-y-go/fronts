@@ -30,11 +30,12 @@ request.interceptors.response.use(
     // 假设你的 Go 后端返回格式是 { code: 200, data: {...}, msg: "success" }
     // 这里直接剥离外层，返回真实的业务数据
     const res = response.data
-
-    // 如果业务状态码不对（根据你 Go 代码的约定修改）
-    if (res.code !== 200) {
-      alert(res.msg || '服务器开小差了')
-      return Promise.reject(new Error(res.msg || 'Error'))
+    if (res && Object.prototype.hasOwnProperty.call(res, 'code')) {
+      if(res.code !== 200 && res.code !== 1){
+        const errorMsg = res['error-message'] || res.msg || '服务器开小差了'
+        alert(errorMsg)
+        return Promise.reject(new Error(errorMsg))
+      }
     }
     return res
   },
