@@ -8,6 +8,16 @@ const router = createRouter({
     {
       // 当用户访问根目录时
       path: '/',
+      name: 'home',
+      component: Home
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register
+    },
+    {
+      path: '/login',
       name: 'login',
       // 显示 Login 组件
       component: Login
