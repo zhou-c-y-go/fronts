@@ -5,6 +5,7 @@ import Login from '../views/LoginView.vue'
 import  Register from '../views/RegisterView.vue'
 import  Home from '../views/HomeView.vue'
 import center from '../views/CenterView.vue'
+import UploadView from "@/views/UploadView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -28,6 +29,12 @@ const router = createRouter({
       path: '/center',
       name: 'personCenter',
       component: center,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/public',
+      name: 'public',
+      component: UploadView,
       meta: { requiresAuth: true }
     }
   ]

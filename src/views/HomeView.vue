@@ -1,128 +1,189 @@
 <template>
-  <div class="min-h-screen bg-[#161823] text-white flex flex-col font-sans select-none">
+  <div class="h-screen bg-[#161823] text-white flex flex-col font-sans select-none overflow-hidden">
 
     <header class="h-16 border-b border-gray-800 bg-[#161823] sticky top-0 z-50 flex items-center justify-between px-6">
-      <div class="flex items-center space-x-2 text-xl font-bold tracking-wider text-red-500">
-        🎵 <span class="text-white">抖音精选</span>
-      </div>
-      <div class="w-1/3 flex items-center bg-[#2f3142] rounded-full px-4 py-1.5 border border-transparent focus-within:border-gray-500">
-        <input type="text" placeholder="搜索你感兴趣的内容" class="bg-transparent w-full outline-none text-sm text-gray-200 placeholder-gray-500"/>
-        <button class="text-gray-400 hover:text-white text-sm px-2">🔍 搜索</button>
-      </div>
+      <TheNavbar/>
+    </header>
 
-      <div class="flex items-center space-x-4">
+    <div class="flex flex-1 overflow-hidden">
 
-        <div v-if="isLoginIn" class="relative group cursor-pointer flex items-center">
-          <img
-            :src="userAvatar"
-            alt="avatar"
-            class="w-8 h-8 rounded-full border border-gray-600 group-hover:border-gray-300 transition-all object-cover"
-          />
-
-          <div class="absolute right-0 top-full pt-2 w-32 hidden group-hover:block z-50">
-            <div class="bg-[#2f3142] rounded-md shadow-lg border border-gray-700 overflow-hidden">
-              <div class="px-4 py-3 text-sm text-gray-200 hover:text-white hover:bg-gray-600 transition-colors" @click="goToProfile">
-                👤 个人主页
-              </div>
-              <div class="px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-gray-600 transition-colors border-t border-gray-700" @click="handleLogout">
-                🚪 退出登录
-              </div>
+      <aside class="w-60 border-r border-gray-800 bg-[#161823] overflow-y-auto p-4 flex flex-col justify-between hidden md:flex flex-shrink-0">
+        <div class="space-y-6">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-3 bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-pink-500 border-l-4 border-pink-500 px-4 py-3 rounded-r-lg cursor-pointer font-medium">
+              🏠 <span>精选广场</span>
+            </div>
+            <div class="flex items-center space-x-3 hover:bg-gray-900 px-4 py-3 rounded-lg cursor-pointer text-gray-400 hover:text-white transition">
+              ✨ <span>推荐关注</span>
+            </div>
+            <div class="flex items-center space-x-3 hover:bg-gray-900 px-4 py-3 rounded-lg cursor-pointer text-gray-400 hover:text-white transition">
+              🤖 <span>AI 智能搜索</span>
+            </div>
+          </div>
+          <hr class="border-gray-800"/>
+          <div class="space-y-1 text-gray-400 text-sm">
+            <div
+              v-for="subItem in subMenuItems"
+              :key="subItem.id"
+              @click="handleSubMenuClick(subItem.id)"
+              class="px-4 py-2 hover:text-white hover:bg-gray-800/30 rounded-lg cursor-pointer transition-all duration-150 flex items-center space-x-2 active:scale-[0.99]"
+            >
+              <span>{{ subItem.icon }}</span>
+              <span>{{ subItem.name }}</span>
             </div>
           </div>
         </div>
 
-        <button
-          v-else
-          class="bg-red-500 hover:bg-red-600 px-5 py-1.5 rounded-md text-sm font-medium transition-all"
-          @click="goToLogin"
+        <div
+          v-if="showDownloadCard"
+          class="relative bg-[#2f3142]/60 border border-gray-800 p-3 rounded-xl text-center space-y-2 text-xs backdrop-blur-xs group transition-all duration-300"
         >
-          登录
-        </button>
-      </div>
-
-    </header>
-
-    <div class="flex flex-1 h-[calc(100vh-4rem)] overflow-hidden">
-
-      <aside class="w-60 border-r border-gray-800 bg-[#161823] overflow-y-auto p-4 flex flex-col justify-between hidden md:flex">
-        <div class="space-y-6">
-          <div class="space-y-1">
-            <div class="flex items-center space-x-3 bg-gray-800 px-4 py-3 rounded-lg cursor-pointer text-red-400 font-medium">🏠 <span>精选</span></div>
-            <div class="flex items-center space-x-3 hover:bg-gray-900 px-4 py-3 rounded-lg cursor-pointer text-gray-400 hover:text-white transition">✨ <span>推荐</span></div>
-            <div class="flex items-center space-x-3 hover:bg-gray-900 px-4 py-3 rounded-lg cursor-pointer text-gray-400 hover:text-white transition">🤖 <span>AI 搜索</span></div>
-          </div>
-          <hr class="border-gray-800"/>
-          <div class="space-y-1 text-gray-400 text-sm">
-          <div
-            v-for="subItem in subMenuItems"
-            :key="subItem.id"
-            @click="handleSubMenuClick(subItem.id)"
-            class="px-4 py-2 hover:text-white hover:bg-gray-800/30 rounded-lg cursor-pointer transition-all duration-150 flex items-center space-x-2 active:scale-[0.99]"
+          <button
+            @click="showDownloadCard = false"
+            class="absolute top-1.5 right-1.5 w-4 h-4 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-300 hover:bg-gray-800/60 transition-all text-[10px] font-sans cursor-pointer active:scale-90"
+            title="关闭提示"
           >
-          <span>{{ subItem.icon }}</span>
-          <span>{{ subItem.name }}</span>
-  </div>
-</div>
-        </div>
-        <div class="bg-[#2f3142] p-3 rounded-xl text-center space-y-2 text-xs">
-          <p class="text-gray-300">客户端看视频更方便</p>
-          <button class="w-full bg-emerald-500 py-1.5 rounded-lg font-bold">下载 APP</button>
+            ✕
+          </button>
+          <p class="text-gray-300 font-medium tracking-wide pt-1">客户端看视频更方便</p>
+          <button class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 py-1.5 rounded-lg font-bold shadow-md active:scale-95 transition-all text-white">
+            下载 APP
+          </button>
         </div>
       </aside>
 
-      <main class="flex-1 overflow-y-auto bg-[#060716] p-6 space-y-6">
+      <main class="flex-1 overflow-y-auto bg-[#060716] p-6 space-y-6" style="scrollbar-gutter: stable;">
 
         <div class="flex items-center space-x-4 overflow-x-auto whitespace-nowrap scrollbar-none text-sm text-gray-400 pb-2">
           <span class="text-white font-medium bg-gray-800 px-3 py-1 rounded-full cursor-pointer">全部</span>
           <span v-for="tag in ['公开课', '游戏', '二次元', '音乐', '影视', '美食', '知识']" :key="tag" class="hover:text-white cursor-pointer px-1 py-1">{{ tag }}</span>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <template v-if="videoFeedList.length > 0">
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-          <div class="xl:col-span-2 bg-black rounded-xl overflow-hidden aspect-video relative group border border-gray-900 flex flex-col justify-end p-6">
-            <img src="https://picsum.photos/800/450" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-lighten" alt="player-placeholder"/>
+            <div
+              class="xl:col-span-2 bg-black rounded-xl overflow-hidden aspect-video relative group border border-gray-900 flex flex-col justify-end p-6 transform-gpu will-change-transform shadow-2xl"
+              style="backface-visibility: hidden;"
+            >
+<!--推荐视频-->
+              <video
+                :src="videoFeedList[0].video_url"
+                :poster="videoFeedList[0].cover_url"
+                @loadedmetadata="handleHistoricalDurationRepair($event, videoFeedList[0])"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="auto"
+                class="absolute inset-0 w-full h-full object-cover opacity-70 transition-opacity duration-300 z-0"
+              ></video>
 
-            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/30 cursor-pointer">
-              <span class="text-5xl">▶️</span>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none z-10"></div>
+
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/20 cursor-pointer z-20">
+                <span class="text-4xl bg-black/50 p-3 rounded-full backdrop-blur-md transform hover:scale-105 transition duration-150">⏸️</span>
+              </div>
+
+              <div class="relative z-20 space-y-2 pointer-events-none">
+                <h2 class="text-xl font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-white tracking-wide">
+                  {{ videoFeedList[0].title }}
+                </h2>
+                <p class="text-xs text-gray-300 drop-shadow">
+                  @{{ videoFeedList[0].author?.username || '匿名极客' }} · 强力推荐
+                </p>
+
+                <div
+                  v-if="parseVideoTags(videoFeedList[0].tags).length > 0"
+                  class="text-[11px] text-blue-400 flex flex-wrap gap-2 items-center pt-1"
+                >
+                  <span class="bg-red-500/20 text-red-400 text-[10px] font-bold px-1.5 py-0.5 rounded-sm animate-pulse tracking-widest">HOT</span>
+                  <span
+                    v-for="(tag, index) in parseVideoTags(videoFeedList[0].tags)"
+                    :key="index"
+                    class="backdrop-blur-md bg-blue-500/10 px-1.5 py-0.5 rounded-sm"
+                  >
+                    #{{ tag }}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div class="relative z-10 space-y-2">
-              <h2 class="text-lg font-bold">沉浸式体验 40分钟肩颈放松 好好享受吧</h2>
-              <p class="text-sm text-gray-300">@小韩爱洗头（皮皮护理）· 1天前</p>
-              <div class="text-xs text-blue-400 flex space-x-2">
-                <span>#解压</span><span>#助眠</span><span>#asmr</span>
+            <div class="space-y-4 max-h-[450px] overflow-y-auto pr-1">
+              <div
+                v-for="video in videoFeedList.slice(1, 4)"
+                :key="video.id"
+                @mouseenter="handleVideoHover"
+                @mouseleave="handleVideoLeave"
+                class="flex space-x-3 bg-[#161823] p-2 rounded-lg hover:bg-gray-900 cursor-pointer transition-colors duration-200 border border-gray-800/40"
+              >
+                <div class="w-32 h-20 bg-black rounded overflow-hidden flex-shrink-0 relative shadow-md">
+                  <video
+                    :src="video.video_url"
+                    :poster="video.cover_url"
+                    muted
+                    loop
+                    @loadedmetadata="handleHistoricalDurationRepair($event, video)"
+                    playsinline
+                    preload="none"
+                    class="w-full h-full object-cover"
+                  ></video>
+                  <span class="absolute bottom-1 right-1 bg-black/60 text-[10px] px-1 rounded font-mono z-10">
+                    {{ video.duration > 0 ? `${Math.floor(video.duration/60)}:${video.duration%60}` : '00:45' }}
+                  </span>
+                </div>
+                <div class="flex flex-col justify-between text-xs py-0.5 flex-1 min-w-0 pointer-events-none">
+                  <p class="font-medium line-clamp-2 text-gray-200 leading-tight">{{ video.title }}</p>
+                  <p class="text-gray-500 truncate">@{{ video.author?.username || '匿名' }} · ❤️ {{ video.like_count }}赞</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div>
+            <h3 class="text-sm font-bold mb-4 flex items-center text-gray-200 tracking-wide">🔥 广场热门精选</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div
+                v-for="item in videoFeedList.slice(4)"
+                :key="item.id"
+                @mouseenter="handleVideoHover"
+                @mouseleave="handleVideoLeave"
+                class="bg-[#161823] rounded-lg overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all duration-200 transform-gpu will-change-transform border border-gray-800/40"
+                style="backface-visibility: hidden; -webkit-backface-visibility: hidden;">
+
+                <div class="aspect-video bg-black relative overflow-hidden">
+                  <video
+                    :src="item.video_url"
+                    :poster="item.cover_url"
+                    muted
+                    @loadedmetadata="handleHistoricalDurationRepair($event, item)"
+                    loop
+                    playsinline
+                    preload="none"
+                    class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                  ></video>
+                  <span class="absolute bottom-2 left-2 text-[10px] font-bold bg-black/50 px-2 py-0.5 rounded-full text-pink-400 z-10">
+                    👍 {{ item.like_count }}
+                  </span>
+                </div>
+
+                <div class="p-3 text-xs space-y-1 pointer-events-none">
+                  <p class="font-medium text-gray-200 truncate">{{ item.title }}</p>
+                  <p class="text-gray-500 font-mono">@{{ item.author?.username || '匿名' }}</p>
+                </div>
               </div>
             </div>
           </div>
+        </template>
 
-          <div class="space-y-4 max-h-[450px] overflow-y-auto pr-1">
-            <div v-for="i in 3" :key="i" class="flex space-x-3 bg-[#161823] p-2 rounded-lg hover:bg-gray-900 cursor-pointer transition">
-              <div class="w-32 h-20 bg-gray-800 rounded overflow-hidden flex-shrink-0 relative">
-                <img :src="`https://picsum.photos/150/100?random=${i}`" class="w-full h-full object-cover" alt="thumb"/>
-                <span class="absolute bottom-1 right-1 bg-black/60 text-[10px] px-1 rounded">40:00</span>
-              </div>
-              <div class="flex flex-col justify-between text-xs py-0.5">
-                <p class="font-medium line-clamp-2 text-gray-200">41分钟周杰伦🎵合集【戴好耳机开听】</p>
-                <p class="text-gray-500">@Bobaya · 3.8万赞</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div>
-          <h3 class="text-md font-bold mb-4 flex items-center">🔥 热门精选</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div v-for="item in 4" :key="item" class="bg-[#161823] rounded-lg overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all">
-              <div class="aspect-video bg-gray-800 relative">
-                <img :src="`https://picsum.photos/300/200?random=${item+10}`" class="w-full h-full object-cover" alt="grid-img"/>
-                <span class="absolute bottom-2 left-2 text-xs font-semibold bg-black/40 px-2 py-0.5 rounded-full">👍 10.2万</span>
-              </div>
-              <div class="p-3 text-xs space-y-1">
-                <p class="font-medium text-gray-200 truncate">OK了老铁们，带你看点不一样的！</p>
-                <p class="text-gray-500">@一口气看完AI · 4天前</p>
-              </div>
-            </div>
+        <div v-else class="flex flex-col items-center justify-center py-32 text-gray-500 space-y-4 border border-dashed border-gray-800 rounded-xl bg-[#161823]/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 stroke-gray-700 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h18M3 16h18" />
+          </svg>
+          <div class="text-center space-y-1">
+            <p class="text-sm tracking-widest text-gray-400 font-medium">公网视频流雷达全速扫描中...</p>
+            <p class="text-xs text-gray-600 font-mono">等待注入：GET /feed 数据流线索</p>
           </div>
         </div>
 
@@ -130,6 +191,127 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router';
+import { onMounted, ref } from "vue";
+import request from "@/utils/request.js"; //
+import TheNavbar from "@/components/TheNavbar.vue"; //
+
+const router = useRouter() //
+const showDownloadCard = ref(true) //
+const isLoginIn = ref(false) //
+const userAvatar = ref('https://api.dicebear.com/7.x/adventurer/svg?seed=Felix') //
+
+const videoFeedList = ref([])
+
+// 🎯 核心网络编排：只要进入主页，立刻轰炸后端公开推荐流接口！
+const fetchGlobalVideoFeed = async () => {
+  try {
+    const res = await request.get('/video/feed') //
+    if (res && res.code === 1 && Array.isArray(res.data)) {
+      // 瞬间把后端的视频源文件、MinIO封面海报、作者模型无损灌入！
+      videoFeedList.value = res.data
+      console.log('⚡ [HomeView] 视频推荐流成功并网！当前装载真实条数:', res.data.length)
+    }
+  } catch (error) {
+    console.error('❌ [HomeView] 拉取后端视频源失败，启动空状态安全舱门:', error)
+  }
+}
+
+const handleVideoHover = (event) => {
+  const video = event.currentTarget.querySelector('video')
+  if (video) {
+    video.preload = 'auto' // 动态加速拉流
+    video.play().catch((err) => {
+      console.warn('⚠️ [HoverPlay] 视频流并网高频打断:', err)
+    })
+  }
+}
+
+const handleVideoLeave = (event) => {
+  const video = event.currentTarget.querySelector('video')
+  if (video) {
+    video.pause()
+    video.currentTime = 0 // 强行校准归零，回源显示海报封面！
+  }
+}
+
+// 获取顶部导航栏头像（保持原本逻辑）
+const getAvatar = async () => {
+  const token = localStorage.getItem('token') //
+  if (token) {
+    isLoginIn.value = true //
+    try {
+      const res = await request.get('/profile') //
+      if (res && res.code === 1 && res.data && res.data.avatar) { //
+        userAvatar.value = res.data.avatar //
+      }
+    } catch (error) {
+      console.error('❌ [Navbar] 拉取最新用户头像失败啦:', error) //
+    }
+  } else {
+    isLoginIn.value = false //
+  }
+}
+
+onMounted(() => {
+  getAvatar() // 1. 捞取个人状态
+  fetchGlobalVideoFeed() // 2. ⚡ 灌注全场公网视频流！
+})
+
+const activeSubMenu = ref('') //
+
+const subMenuItems = ref([ //
+  { id: 'following', name: '关注', icon: '👥' }, //
+  { id: 'friends',   name: '朋友', icon: '🤝' }, //
+  { id: 'center',    name: '我的', icon: '👤' } //
+])
+
+// 左侧边栏未登录路由拦截安检线
+const handleSubMenuClick = (subId) => {
+  if (subId === 'center') {
+    const token = localStorage.getItem('token') //
+    if (!token) {
+      alert('您还没有登录哦！请先在右上方登录，才能解锁个人中心~')
+      router.push('/login')
+      return
+    }
+  }
+  activeSubMenu.value = subId //
+  router.push(`/${subId}`) //
+}
+
+const parseVideoTags = (tagsStr) => {
+  if (!tagsStr) return []
+  return tagsStr.split(/[,，；;\s]+/).filter(tag => tag.trim() !== '')
+}
+
+const handleHistoricalDurationRepair = async (event, videoItem) => {
+  if (!videoItem) return
+  // 浏览器利用本地硬件解码器秒级抓取到的绝对真实时长
+  const realDuration = Math.round(event.target.duration)
+
+  // 🎯 判定红线：如果后端传过来的数据是 0（或者是 null），而浏览器探测到了大于 0 的真时长
+  if ((videoItem.duration === 0 || !videoItem.duration) && realDuration > 0) {
+
+    // 🚀 动作一：前端组件内存模型先秒级同步，让用户立刻看到漂亮的时间戳
+    videoItem.duration = realDuration
+
+    // 🚀 动作二：悄悄发射一笔轻量级请求，回源清洗 MySQL 历史陈旧数据！
+    try {
+      await request.put('/video/repair-duration', {
+        id: videoItem.id,
+        duration: realDuration
+      })
+      console.log(`🎯 [自愈系统] 成功悄悄清洗并修复历史视频 [ID: ${videoItem.id}] 的时长为 ${realDuration} 秒！`)
+    } catch (error) {
+      // 静默失败，绝对不打扰、不中断用户的正常刷视频体验
+      console.error('⚠️ [Self-Healing] 悄悄修复历史数据失败:', error)
+    }
+  }
+}
+</script>
 
 <style scoped>
 .scrollbar-none::-webkit-scrollbar {
@@ -140,69 +322,3 @@
   scrollbar-width: none;
 }
 </style>
-
-<script setup>
-import { useRouter } from 'vue-router';
-import {onMounted, ref} from "vue";
-import request from "@/utils/request.js";
-const router = useRouter()
-const isLoginIn = ref(false)
-const userAvatar = ref('https://api.dicebear.com/7.x/adventurer/svg?seed=Felix')
-onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    isLoginIn.value = true
-
-    // 💡 降维打击：告别过期的 localStorage 暂存，直接触发高性能缓存回源！
-    try {
-      const res = await request.get('/profile')
-      // 严格对齐我们设定的【只认 1 为成功】的绝对绿灯暗号！
-      if (res && res.code === 1 && res.data && res.data.avatar) {
-        userAvatar.value = res.data.avatar // 瞬间秒级同步最新的 MinIO 头像网络路径！
-        console.log('⚡ [Navbar] 身份验证通过，已成功捞取实时动态头像链路。')
-      }
-    } catch (error) {
-      console.error('❌ [Navbar] 拉取最新用户头像失败啦:', error)
-      // 如果报错，拦截器会自动弹窗，这里静默降级走默认头像即可，不影响核心体验
-    }
-  } else {
-    isLoginIn.value = false
-    // 没登录时，可以视情况强制重定向到登录页
-    // router.push('/login')
-  }
-})
-const goToLogin = async () => {
-  await router.push('/login')
-}
-
-// 推出逻辑
-const handleLogout = () => {
-  // 清除本地存储的 Token 和其他用户数据
-  localStorage.removeItem('token')
-  localStorage.removeItem('expired_at')
-  isLoginIn.value = false
-
-  alert('已成功退出登录！')
-  // 退出后不一定要跳走，留在首页即可，因为首页是对外公开的
-}
-
-const goToProfile = async () => {
-  await router.push('/center')
-}
-
-const activeSubMenu = ref('')
-
-// 💡 将你截图里的静态内容统一收拢到这个数组里
-const subMenuItems = ref([
-  { id: 'following', name: '关注', icon: '👥' },
-  { id: 'friends',   name: '朋友', icon: '🤝' },
-  { id: 'center',    name: '我的', icon: '👤' }
-])
-
-// 💡 子菜单的点击调度中枢
-const handleSubMenuClick = (subId) => {
-  activeSubMenu.value = subId
-  console.log(`🔗 子功能区已成功切流至: [${subId}]`)
-  router.push(`/${subId}`)
-}
-</script>

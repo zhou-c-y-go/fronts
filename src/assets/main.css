@@ -2,3 +2,30 @@
 @theme {
   --color-dy-red: #FE2C55;
 }
+html {
+  color-scheme: dark;
+
+  /* 顺手把根节点的背景也焊死成深色，防止页面加载瞬间闪烁白光 */
+  background-color: #161823;
+}
+::-webkit-scrollbar {
+  width: 8px;               /* 垂直滚动条宽度 */
+  height: 8px;              /* 水平滚动条高度 */
+}
+
+/* 2. 🧺 滚动条轨道：彻底清洗掉刺眼的白边，换上和背景融为一体的深色 */
+::-webkit-scrollbar-track {
+  background: #161823;      /* 严格对齐你主页的深色底色 #161823 */
+}
+
+/* 3. 🛹 滚动条滑块（那个随着页面上下滑动的深灰色小抓手） */
+::-webkit-scrollbar-thumb {
+  background: #2d3142;      /* 滑块颜色，比背景稍亮，方便用户辨识位置 */
+  border-radius: 999px;     /* 彻底磨平锐利边缘，化为圆角极客条 */
+  border: 2px solid #161823; /* 巧妙利用 2px 透明边框，在滑块和轨道间做一层微距呼吸感隔离 */
+}
+
+/* 4. 🚀 悬浮特效：当鼠标 hover 到滚动条上时，滑块微微高亮反馈 */
+::-webkit-scrollbar-thumb:hover {
+  background: #4a526d;      /* 变亮，操作感拉满 */
+}
