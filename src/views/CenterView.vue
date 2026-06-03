@@ -171,8 +171,9 @@ const userInfo = ref({
   followers: 0,
   total_liked: 0,
   bg_img: '',
+  id: 0,
 })
-
+//用户作品集
 const worksList = ref([])
 const isModalOpen = ref(false)
 const isUploading = ref(false)
@@ -204,7 +205,7 @@ const fetchUserProfile = async () => {
   try {
     const res = await request.get('/profile')
     if (res && res.code === 1 && res.data) {
-      const { username, avatar, signature, total_liked, work_count, favorite_count, gender, background_image} = res.data
+      const { username, avatar, signature, total_liked, work_count, favorite_count, gender, background_image, id} = res.data
       userInfo.value.username = username
       userInfo.value.avatar = avatar
       userInfo.value.signature = signature
@@ -213,6 +214,8 @@ const fetchUserProfile = async () => {
       userInfo.value.work_count = work_count || 0
       userInfo.value.favorite_count = favorite_count || 0
       userInfo.value.bg_img = background_image
+      userInfo.value.id = id
+      await fetchUserWorks(id)
     }
   } catch (error) {
     console.error("安全警报：黑客强攻或验证失效，正在执行强退熔断:", error)
@@ -224,7 +227,7 @@ const fetchUserProfile = async () => {
 onMounted(() => {
   const token = localStorage.getItem('token')
   if (!token) {
-    alert('🥺 宝宝，此区域属于私人核心控制部！检测到您还未登录，系统已自动拦截越权行为~')
+    alert('此区域属于私人核心控制部！检测到您还未登录，系统已自动拦截越权行为~')
     router.push('/login')
     return
   }
@@ -313,6 +316,10 @@ const handleMenuClick = (menuId) => {
   router.push(targetPath)
   console.log(`🔗 个人中心成功发起导航切流: [${targetPath}]`)
 }
+
+const loading = ref(false)
+
+
 </script>
 
 <style scoped>
