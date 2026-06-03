@@ -186,6 +186,20 @@ const editForm = reactive({
   avatar: ''
 })
 
+const fetchUserWorks = async (authorId) => {
+  try {
+    loading.value = true
+    const res = await request.get(`/video/user/list?user_id=${authorId}`)
+    if (res && res.code === 1) {
+      worksList.value = res.data // 稳稳接住这批高并发抗压作品集！
+    }
+  } catch (error) {
+    console.error("捞取个人作品失败:", error)
+  } finally {
+    loading.value = false
+  }
+}
+
 const fetchUserProfile = async () => {
   try {
     const res = await request.get('/profile')
