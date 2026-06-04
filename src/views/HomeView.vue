@@ -116,6 +116,7 @@
                 :key="video.id"
                 @mouseenter="handleVideoHover"
                 @mouseleave="handleVideoLeave"
+                @click="openVideoDetail(video.id)"
                 class="flex space-x-3 bg-[#161823] p-2 rounded-lg hover:bg-gray-900 cursor-pointer transition-colors duration-200 border border-gray-800/40"
               >
                 <div class="w-32 h-20 bg-black rounded overflow-hidden flex-shrink-0 relative shadow-md">
@@ -311,6 +312,15 @@ const handleHistoricalDurationRepair = async (event, videoItem) => {
       console.error('⚠️ [Self-Healing] 悄悄修复历史数据失败:', error)
     }
   }
+}
+//  剥离当前单页应用，在浏览器中打开新的标签页
+const openVideoDetail = (videoId) => {
+  if (!videoId) return
+
+  // 1. 利用 Vue Router 的 resolve 神技，把动态路由转换为真实的浏览器绝对 URL（比如 /video/12）
+  const routeUrl = router.resolve({ path: `/video/${videoId}` })
+  // 2. 召唤浏览器底层 API：'_blank' 代表强制开启全新标签页！
+  window.open(routeUrl.href, '_blank')
 }
 </script>
 
