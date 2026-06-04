@@ -47,7 +47,6 @@ const router = createRouter({
       path: '/user/:authorId',
       name: 'personCenter',
       component: center,
-      meta: { requiresAuth: true }
     },
   ]
 })
