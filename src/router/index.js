@@ -27,7 +27,7 @@ const router = createRouter({
     },
     {
       path: '/center',
-      name: 'personCenter',
+      name: 'selfCenter',
       component: center,
       meta: { requiresAuth: true }
     },
@@ -36,7 +36,19 @@ const router = createRouter({
       name: 'public',
       component: UploadView,
       meta: { requiresAuth: true }
-    }
+    },
+    {
+      path: '/video/:id',
+      name: 'VideoDetail',
+      component: () => import('@/views/VideoDetailView.vue'),
+      meta: { title: '视频详情' }
+    },
+    {
+      path: '/user/:authorId',
+      name: 'personCenter',
+      component: center,
+      meta: { requiresAuth: true }
+    },
   ]
 })
 router.beforeEach((to, from, next) => {
