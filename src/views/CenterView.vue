@@ -224,15 +224,45 @@ const fetchUserProfile = async () => {
 }
 
 // 💡 核心升级 5：在生命周期挂载时，筑起绝对严密的安全安检红线！
-onMounted(() => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    alert('此区域属于私人核心控制部！检测到您还未登录，系统已自动拦截越权行为~')
-    router.push('/login')
-    return
+onMounted(async () => {
+  if (isSelf) {
+    // ==========================================
+    // 🛡️ 模式一：访问自己的 /center，严守安全红线
+    // ==========================================
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('🥺 宝宝，您还没有登录哦~')
+      router.push('/login')
+      return
+    }
+    // 拉取自己的私密资料（你原本写好的逻辑）
+    await fetchUserProfile()
+  } else {
+    // ==========================================
+    // 🌐 模式二：访问别人的 /user/:id，公开大门敞开
+    // ==========================================
+    // 1. 去拉取这个创作者的作品集
+    await fetchUserWorks(targetUserId)
+
+    // 2. 去拉取这个创作者的公开个人名片 (⚠️注意：这里需要后端配合！)
+    await fetchPublicUserInfo(targetUserId)
   }
-  fetchUserProfile()
 })
+
+// 🌐 专门为“看别人”准备的公开资料拉取函数
+const fetchPublicUserInfo = async (id) => {
+  try {
+    // TODO 后端
+    // 它的作用是传入 id，返回该用户的用户名、头像、签名等基础信息
+    const res = await request.get(`/user/info?id=${id}`)
+    if (res && res.code === 1) {
+      // 拿到数据后，强行塞进咱们页面的 userInfo 响应式矩阵里，UI 瞬间点亮！
+      userInfo.value = res.data
+    }
+  } catch (error) {
+    console.error("捞取创作者公开信息失败:", error)
+  }
+}
 
 const triggerFileInput = () => {
   if (isUploading.value) return
@@ -318,6 +348,11 @@ const handleMenuClick = (menuId) => {
 }
 
 const loading = ref(false)
+import { useRoute } from 'vue-router' // 引入路由探针
+const route = useRoute()
+// 如果 URL 是 /center，那么 targetUserId 就是 undefined
+const targetUserId = route.params.id
+const isSelf = !targetUserId // 判断是否为“看自己”模式
 
 
 </script>
