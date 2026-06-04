@@ -65,6 +65,7 @@
             <div
               class="xl:col-span-2 bg-black rounded-xl overflow-hidden aspect-video relative group border border-gray-900 flex flex-col justify-end p-6 transform-gpu will-change-transform shadow-2xl"
               style="backface-visibility: hidden;"
+              @click="openVideoDetail(videoFeedList[0].id)"
             >
 <!--推荐视频-->
               <video
