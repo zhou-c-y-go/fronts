@@ -51,18 +51,18 @@
           </div>
 
           <div class="space-y-6">
-            <div class="bg-gray-100 rounded-2xl p-4">
+            <div class="w-full bg-gray-100 rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-pink-500 transition-all flex items-center">
               <input
                 type="text"
                 placeholder="手机号/邮箱/用户名"
-                class="w-full bg-transparent text-lg focus:outline-none"
+                class="w-full bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none"
                 v-model="phone"/>
             </div>
-            <div class="bg-gray-100 rounded-2xl p-4">
+            <div class="w-full bg-gray-100 rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-pink-500 transition-all flex items-center">
               <input
                 type="password"
                 placeholder="密码"
-                class="w-full bg-transparent text-lg focus:outline-none"
+                class="w-full bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none"
                 v-model="password"/>
             </div>
           </div>
