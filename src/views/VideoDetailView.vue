@@ -102,6 +102,12 @@
                 <div class="flex items-center justify-between">
                   <span class="text-[13px] text-gray-400 font-medium">{{ rootComment.user.username }}</span>
                   <span class="text-[10px] text-gray-600 font-mono">{{ formatDate(rootComment.created_at) }}</span>
+                  <LikeButton
+                    v-model:is-liked="rootComment.is_liked"
+                    v-model:like-count="rootComment.like_count"
+                    :target-id="rootComment.id"
+                    target-type="comment"
+                  />
                 </div>
                 <p class="text-sm text-gray-200 leading-relaxed">{{ rootComment.content }}</p>
                 <div class="text-[11px] text-gray-500 pt-1 cursor-pointer hover:text-gray-300 transition-colors w-max" @click="setReplyTarget(rootComment)">
@@ -126,6 +132,12 @@
                         <span class="text-gray-600 mx-1.5 text-[10px]">▸</span>
                         <span class="text-gray-500">{{ child.targetUsername }}</span>
                       </template>
+                      <LikeButton
+                          v-model:is-liked="child.is_liked"
+                          v-model:like-count="child.like_count"
+                          :target-id="child.id"
+                          target-type="comment"
+                      />
                     </div>
                     <span class="text-[10px] text-gray-600 font-mono">{{ formatDate(child.created_at) }}</span>
                   </div>
@@ -171,6 +183,8 @@
 import {ref, onMounted, computed} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request.js'
+import LikeButton from "@/components/LikeButton.vue";
+import FavoriteButton from "@/components/FavoriteButton.vue";
 
 const route = useRoute()
 const router = useRouter()
@@ -180,36 +194,32 @@ const videoId = route.params.id
 // ==================== 🎬 视频详情流 ====================
 const videoDetail = ref({})
 // 预留的状态墙
-const isLiked = ref(false)
-const isFavorited = ref(false)
 
 const fetchVideoDetail = async () => {
   try {
-    // 💡 注意：这里调用的是获取单个视频详情的接口
-    // 如果 Go 后端目前还没有 /video/detail 这个接口，我们下一轮就去把它焊起来！
     const res = await request.get(`/video/detail?id=${videoId}`)
     if (res && res.code === 1) {
-      const d = res.data
+      const d = res.data   // 注意：这里 res.data 就是视频详情对象，因为后端返回的是 { code, data } 结构
       videoDetail.value = {
+        id: d.id,
+        title: d.title,
         videoUrl: d.video_url || d.VideoUrl,
         coverUrl: d.cover_url || d.CoverUrl,
         createdAt: d.created_at || d.CreatedAt,
-        likeCount: d.like_count || d.LikeCount,
-        favoriteCount: d.favorite_count || d.FavoriteCount,
-        author: d.author || d.Author || {},
-        title: d.title,
-        tags: d.tags || {},
+        likeCount: d.like_count || d.LikeCount || 0,
+        favoriteCount: d.favorite_count || d.FavoriteCount || 0,
         duration: d.duration || 0,
+        tags: d.tags || '',
+        author: d.author || {},
+        isLiked: d.is_like || d.IsLike || false,   // ✅ 直接从 d 中取
+        isFavorite: d.is_favorite || d.isFavorite || false,
       }
-      // 真实业务中，点赞收藏状态也是从后端吐回来的
-      isLiked.value = res.data.isLike || false
-      isFavorited.value = res.data.isFavorite || false
     }
   } catch (error) {
-    console.error("❌ 拉取视频基建详情失败:", error)
+    console.error("❌ 拉取视频详情失败:", error)
   }
 }
-
+console.log(videoDetail.value.isLiked)
 // ==================== 💬 评论树流 ====================
 const commentTree = ref([])
 const commentInput = ref('')
@@ -267,15 +277,6 @@ const submitComment = async () => {
   }
 }
 
-// ==================== 预留互动动作 ====================
-const handleLike = () => {
-  console.log('🚧 点赞信号已发出，等待后端管道通车...')
-  isLiked.value = !isLiked.value
-}
-const handleFavorite = () => {
-  console.log('🚧 收藏信号已发出，等待后端管道通车...')
-  isFavorited.value = !isFavorited.value
-}
 
 // ==================== 工具函数 ====================
 const formatDate = (isoString) => {
