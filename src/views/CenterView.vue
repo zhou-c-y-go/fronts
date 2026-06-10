@@ -77,16 +77,20 @@
         <section class="pt-6">
           <div class="flex space-x-8 border-b border-gray-800/60 mb-6 text-sm">
             <button class="pb-3 border-b-2 border-pink-500 font-medium text-gray-100">作品 ({{ worksList.length }})</button>
-            <button class="pb-3 text-gray-500 hover:text-gray-300 transition">喜欢 ()</button>
-            <button class="pb-3 text-gray-500 hover:text-gray-300 transition">收藏 ()</button>
+            <button class="pb-3 text-gray-500 hover:text-gray-300 transition">喜欢 ({{ totalLikeCount }})</button>
+            <button class="pb-3 text-gray-500 hover:text-gray-300 transition">收藏 ({{ totalFavoriteCount }})</button>
           </div>
 
-          <div v-if="worksList.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div
+            v-if="worksList.length > 0"
+            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+          >
             <div
               v-for="work in worksList"
               :key="work.id"
               class="aspect-[3/4] bg-gray-800 rounded-lg overflow-hidden relative group cursor-pointer hover:scale-[1.02] transition-transform duration-200 transform-gpu will-change-transform"
               style="backface-visibility: hidden;"
+              @click="openVideoDetail(work.id)"
             >
               <img :src="work.cover_url" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               <div class="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between text-xs">
@@ -161,6 +165,8 @@ import { ref, reactive, onMounted } from 'vue'
 import request from '@/utils/request.js'
 import router from "@/router/index.js"
 import TheNavbar from "@/components/TheNavbar.vue"
+import { useRoute } from 'vue-router' // 引入路由探针
+import {openVideoDetail} from "@/utils/getVideoDetail.js";
 
 const userInfo = ref({
   username: '',
@@ -223,31 +229,37 @@ const fetchUserProfile = async () => {
   }
 }
 
-// 💡 核心升级 5：在生命周期挂载时，筑起绝对严密的安全安检红线！
-onMounted(async () => {
-  if (isSelf) {
-    // ==========================================
-    // 🛡️ 模式一：访问自己的 /center，严守安全红线
-    // ==========================================
-    const token = localStorage.getItem('token')
-    if (!token) {
-      alert('🥺 宝宝，您还没有登录哦~')
-      router.push('/login')
-      return
-    }
-    // 拉取自己的私密资料（你原本写好的逻辑）
-    await fetchUserProfile()
-  } else {
-    // ==========================================
-    // 🌐 模式二：访问别人的 /user/:id，公开大门敞开
-    // ==========================================
-    // 1. 去拉取这个创作者的作品集
-    await fetchUserWorks(targetUserId)
 
-    // 2. 去拉取这个创作者的公开个人名片 (⚠️注意：这里需要后端配合！)
-    await fetchPublicUserInfo(targetUserId)
+// 组件中
+const totalLikeCount = ref(0)
+const totalFavoriteCount = ref(0)
+const fetchTotalLikeCount = async () => {
+  const res = await request.get('/like/total')
+  console.log('原始响应:', JSON.parse(JSON.stringify(res)))
+  if (res.code === 1 && res.data) {
+    totalLikeCount.value = res.data || 0
   }
-})
+}
+const fetchTotalFavoriteCount = async () => {
+  const res = await request.get('/favorite/total')
+  if (res.code === 1 && res.data) {
+    totalFavoriteCount.value = res.data || 0
+  }
+}
+const initPage = async () => {
+  if (isSelf) {
+    await fetchUserProfile()
+    await fetchTotalLikeCount()  // 获取本人点赞总数
+    await fetchTotalFavoriteCount()
+  } else {
+    await fetchUserWorks(targetUserId)
+    await fetchPublicUserInfo(targetUserId)
+    // 注意：他人主页是否显示该用户的点赞总数？通常不需要，所以不调用 fetchTotalLikeCount
+  }
+}
+
+// 💡 核心升级 5：在生命周期挂载时，筑起绝对严密的安全安检红线！
+onMounted(initPage)
 
 // 🌐 专门为“看别人”准备的公开资料拉取函数
 const fetchPublicUserInfo = async (id) => {
@@ -348,7 +360,7 @@ const handleMenuClick = (menuId) => {
 }
 
 const loading = ref(false)
-import { useRoute } from 'vue-router' // 引入路由探针
+
 const route = useRoute()
 // 如果 URL 是 /center，那么 targetUserId 就是 undefined
 const targetUserId = route.params.id
